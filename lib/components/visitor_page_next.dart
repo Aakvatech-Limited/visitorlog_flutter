@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ui_shop/components/model/Employee.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'home.dart';
 
 class VisitorPageNext extends StatefulWidget {
@@ -59,16 +59,29 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
   }
 
   Future<void> _sendVisotors(String employee) async {
-    String barcodeScanRes;
+    String barcodeScanRes = '';
     const baseUrl = 'http://192.168.1.112:8000';
     const authToken = 'token 2f01ca5678d9c64:127583f0e7fb556';
 
     try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', 'Cancel', true, ScanMode.QR);
+      // Navigate to scanner page and wait for result
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MobileScanner(
+            onDetect: (capture) {
+              final List<Barcode> barcodes = capture.barcodes;
+              if (barcodes.isNotEmpty) {
+                Navigator.pop(context, barcodes.first.rawValue ?? '');
+              }
+            },
+          ),
+        ),
+      );
+      barcodeScanRes = result ?? '';
       print(barcodeScanRes);
-    } on PlatformException {
-      barcodeScanRes = 'Failed to get platform version.';
+    } catch (e) {
+      barcodeScanRes = 'Failed to scan barcode.';
     }
     if (!mounted) return;
 

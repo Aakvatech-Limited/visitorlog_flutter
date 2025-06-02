@@ -18,7 +18,7 @@ import 'common/custom_select_field.dart';
 import 'common/page_text.dart';
 import 'package:http/http.dart' as http;
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import 'model/Visitor.dart';
 // import 'package:flutter_animated_button/flutter_animated_button.dart';
@@ -57,13 +57,26 @@ class _VisitorPageSearchState extends State<VisitorPageSearch> {
   }
 
   Future<void> scanQR(String id, String log_type, String full_name) async {
-    String barcodeScanRes;
+    String barcodeScanRes = '';
     try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', 'Cancel', true, ScanMode.QR);
+      // Navigate to scanner page and wait for result
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MobileScanner(
+            onDetect: (capture) {
+              final List<Barcode> barcodes = capture.barcodes;
+              if (barcodes.isNotEmpty) {
+                Navigator.pop(context, barcodes.first.rawValue ?? '');
+              }
+            },
+          ),
+        ),
+      );
+      barcodeScanRes = result ?? '';
       print(barcodeScanRes);
-    } on PlatformException {
-      barcodeScanRes = 'Failed to get platform version.';
+    } catch (e) {
+      barcodeScanRes = 'Failed to scan barcode.';
     }
     if (!mounted) return;
 

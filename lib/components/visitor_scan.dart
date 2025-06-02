@@ -13,7 +13,6 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:ui_shop/components/common/custom_form_button.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 import 'home.dart';
 import 'visitor_home.dart';
@@ -37,16 +36,25 @@ class _VisitorScanState extends State<VisitorScan> {
   final authToken = 'token 2f01ca5678d9c64:127583f0e7fb556';
 
   Future<void> scanQR() async {
-    String barcodeScanRes;
+    String barcodeScanRes = '';
     try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-        '#ff6666',
-        'Cancel',
-        true,
-        ScanMode.QR,
+      // Navigate to scanner page and wait for result
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MobileScanner(
+            onDetect: (capture) {
+              final List<Barcode> barcodes = capture.barcodes;
+              if (barcodes.isNotEmpty) {
+                Navigator.pop(context, barcodes.first.rawValue ?? '');
+              }
+            },
+          ),
+        ),
       );
-    } on PlatformException {
-      barcodeScanRes = 'Failed to get platform version.';
+      barcodeScanRes = result ?? '';
+    } catch (e) {
+      barcodeScanRes = 'Failed to scan barcode.';
     }
     if (!mounted) return;
 
