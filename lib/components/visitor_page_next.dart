@@ -85,7 +85,7 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
     }
     if (!mounted) return;
 
-    final uri = Uri.parse('$baseUrl/api/method/visitors_scan');
+    final uri = Uri.parse('$baseUrl/api/method/visitor.api.visitor_scan.visitors_scan');
     final response = await http.post(uri,
         body: {'qr_code': barcodeScanRes, 'api_type': 'register'},
         headers: {'Authorization': authToken});

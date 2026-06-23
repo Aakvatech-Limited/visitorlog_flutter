@@ -58,7 +58,7 @@ class _VisitorScanState extends State<VisitorScan> {
     }
     if (!mounted) return;
 
-    final uri = Uri.parse('$baseUrl/api/method/visitors_scan');
+    final uri = Uri.parse('$baseUrl/api/method/visitor.api.visitor_scan.visitors_scan');
     final response = await http.post(uri,
         body: {'qr_code': barcodeScanRes, 'api_type': 'scan'},
         headers: {'Authorization': authToken});
@@ -127,9 +127,9 @@ class _VisitorScanState extends State<VisitorScan> {
     const baseUrl = 'http://192.168.1.112:8000';
     const authToken = 'token 2f01ca5678d9c64:127583f0e7fb556';
 
-    final uri = Uri.parse('$baseUrl/api/method/visitors_registration');
+    final uri = Uri.parse('$baseUrl/api/method/visitor.api.visitor_scan.register_visitor');
     final response = await http.post(uri,
-        body: {'code': code, 'log_type': "widget.logType"},
+        body: {'code': code, 'log_type': widget.toString()},
         headers: {'Authorization': authToken});
     final body = response.body;
     Navigator.of(context).pop();
