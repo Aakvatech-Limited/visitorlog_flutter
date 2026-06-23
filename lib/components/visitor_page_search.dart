@@ -38,8 +38,8 @@ class _VisitorPageSearchState extends State<VisitorPageSearch> {
   List<Visistor> _foundVisitor = [];
   String _scanBarcode = 'Unknown';
 
-  final baseUrl = 'http://192.168.1.112:8000';
-  final authToken = 'token 2f01ca5678d9c64:127583f0e7fb556';
+  final baseUrl = 'https://demo15.aakvaerp.com';
+  final authToken = 'token 12b59d64ab0f102:0e59fedfef8c2e8';
 
   void _runFilter(String keyWord) {
     List<Visistor> result = [];

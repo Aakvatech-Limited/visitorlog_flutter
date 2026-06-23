@@ -60,8 +60,8 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
 
   Future<void> _sendVisotors(String employee) async {
     String barcodeScanRes = '';
-    const baseUrl = 'http://192.168.1.112:8000';
-    const authToken = 'token 2f01ca5678d9c64:127583f0e7fb556';
+    const baseUrl = 'https://demo15.aakvaerp.com';
+    const authToken = 'token 12b59d64ab0f102:0e59fedfef8c2e8';
 
     try {
       // Navigate to scanner page and wait for result
@@ -170,10 +170,10 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
 
   fetch_user() async {
     const url =
-        'http://192.168.1.112:8000/api/resource/Employee?fields=["employee_name", "employee"]&limit=10000';
+        'https://demo15.aakvaerp.com/api/resource/Employee?fields=["employee_name", "employee"]&limit=10000';
     final uri = Uri.parse(url);
     final response = await http.get(uri,
-        headers: {'Authorization': 'token 2f01ca5678d9c64:127583f0e7fb556'});
+        headers: {'Authorization': 'token 12b59d64ab0f102:0e59fedfef8c2e8'});
     final body = response.body;
     final json = jsonDecode(body);
     final datas = json['data'] as List<dynamic>;
