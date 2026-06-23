@@ -44,14 +44,24 @@ class _VisitorScanState extends State<VisitorScan> {
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => MobileScanner(
-            onDetect: (capture) {
-              final List<Barcode> barcodes = capture.barcodes;
-              if (barcodes.isNotEmpty) {
-                Navigator.pop(context, barcodes.first.rawValue ?? '');
-              }
-            },
-          ),
+          builder: (context) {
+            bool isScanned = false;
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('Scan QR Code'),
+              ),
+              body: MobileScanner(
+                onDetect: (capture) {
+                  if (isScanned) return;
+                  final List<Barcode> barcodes = capture.barcodes;
+                  if (barcodes.isNotEmpty) {
+                    isScanned = true;
+                    Navigator.pop(context, barcodes.first.rawValue ?? '');
+                  }
+                },
+              ),
+            );
+          },
         ),
       );
       barcodeScanRes = result ?? '';
