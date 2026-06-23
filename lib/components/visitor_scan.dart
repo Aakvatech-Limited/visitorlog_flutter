@@ -29,7 +29,9 @@ class _VisitorScanState extends State<VisitorScan> {
   @override
   void initState() {
     super.initState();
-    scanQR();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scanQR();
+    });
   }
 
   final baseUrl = 'https://demo15.aakvaerp.com';
@@ -66,7 +68,13 @@ class _VisitorScanState extends State<VisitorScan> {
     final json = jsonDecode(body);
 
     final log = json['message'];
-    print(log);
+    print("Response body: $body");
+    print("Parsed log: $log");
+
+    if (log == null) {
+      _showMyDialog("Server error or invalid response. Body: $body");
+      return;
+    }
 
     if (log['status'] == "card_not_existing") {
       _showMyDialog("This Card not existing.");
