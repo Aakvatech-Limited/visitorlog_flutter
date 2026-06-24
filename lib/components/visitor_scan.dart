@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 
+import 'common/qr_scanner_screen.dart';
 import 'home.dart';
 
 class VisitorScan extends StatefulWidget {
@@ -32,26 +32,10 @@ class _VisitorScanState extends State<VisitorScan> {
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) {
-            bool isScanned = false;
-            return Scaffold(
-              appBar: AppBar(
-                title: const Text('Scan QR Code'),
-                backgroundColor: Color.fromRGBO(13, 29, 56, 1),
-                foregroundColor: Colors.white,
-              ),
-              body: MobileScanner(
-                onDetect: (capture) {
-                  if (isScanned) return;
-                  final List<Barcode> barcodes = capture.barcodes;
-                  if (barcodes.isNotEmpty) {
-                    isScanned = true;
-                    Navigator.pop(context, barcodes.first.rawValue ?? '');
-                  }
-                },
-              ),
-            );
-          },
+          builder: (context) => const QRScannerScreen(
+            title: 'Scan Visitor QR',
+            instruction: 'Hold the visitor card QR code inside the frame',
+          ),
         ),
       );
       barcodeScanRes = result ?? '';

@@ -15,7 +15,7 @@ import 'common/custom_select_field.dart';
 import 'common/page_text.dart';
 import 'package:http/http.dart' as http;
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'common/qr_scanner_screen.dart';
 
 import 'model/Visitor.dart';
 
@@ -57,20 +57,9 @@ class _VisitorPageSearchState extends State<VisitorPageSearch> {
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => Scaffold(
-            appBar: AppBar(
-              title: const Text('Scan Visitor Card'),
-              backgroundColor: Color.fromRGBO(13, 29, 56, 1),
-              foregroundColor: Colors.white,
-            ),
-            body: MobileScanner(
-              onDetect: (capture) {
-                final List<Barcode> barcodes = capture.barcodes;
-                if (barcodes.isNotEmpty) {
-                  Navigator.pop(context, barcodes.first.rawValue ?? '');
-                }
-              },
-            ),
+          builder: (context) => const QRScannerScreen(
+            title: 'Scan Visitor Card',
+            instruction: 'Align the visitor card QR code inside the frame',
           ),
         ),
       );

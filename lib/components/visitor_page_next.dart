@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ui_shop/components/model/Employee.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_scanner/mobile_scanner.dart';
 import 'home.dart';
+import 'common/qr_scanner_screen.dart';
 
 class VisitorPageNext extends StatefulWidget {
   final String? fullName;
@@ -67,20 +67,9 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => Scaffold(
-            appBar: AppBar(
-              title: const Text('Scan Card QR Code'),
-              backgroundColor: Color.fromRGBO(13, 29, 56, 1),
-              foregroundColor: Colors.white,
-            ),
-            body: MobileScanner(
-              onDetect: (capture) {
-                final List<Barcode> barcodes = capture.barcodes;
-                if (barcodes.isNotEmpty) {
-                  Navigator.pop(context, barcodes.first.rawValue ?? '');
-                }
-              },
-            ),
+          builder: (context) => const QRScannerScreen(
+            title: 'Scan Card QR',
+            instruction: 'Align the visitor card QR code inside the frame',
           ),
         ),
       );
