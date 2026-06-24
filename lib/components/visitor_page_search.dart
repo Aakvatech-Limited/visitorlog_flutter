@@ -32,9 +32,46 @@ class _VisitorPageSearchState extends State<VisitorPageSearch> {
   List<Visistor> _allVisitors = [];
   List<Visistor> _foundVisitor = [];
   String _scanBarcode = 'Unknown';
+  bool _isLoading = true;
 
   final baseUrl = 'https://demo15.aakvaerp.com';
   final authToken = 'token 12b59d64ab0f102:0e59fedfef8c2e8';
+
+  @override
+  void initState() {
+    super.initState();
+    fetch_visitors();
+  }
+
+  Future<void> fetch_visitors() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      final uri = Uri.parse(
+          '$baseUrl/api/resource/Visitors Registration Log?fields=["full_name", "contact_number", "name", "log_type"]&limit=10000');
+      final response = await http.get(uri, headers: {'Authorization': authToken});
+      final body = response.body;
+      final json = jsonDecode(body);
+      final datas = json['data'] as List<dynamic>? ?? [];
+      final transformed = datas.map((e) {
+        return Visistor(
+            full_name: e['full_name'] ?? '',
+            contact_number: e['contact_number'] ?? '',
+            name: e['name'] ?? '',
+            log_type: e['log_type'] ?? '');
+      }).toList();
+      setState(() {
+        _allVisitors = transformed;
+        _foundVisitor = _allVisitors;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   void _runFilter(String keyWord) {
     List<Visistor> result = [];
@@ -245,7 +282,7 @@ class _VisitorPageSearchState extends State<VisitorPageSearch> {
                             ),
                           ),
                           Text(
-                            'Pull down to refresh the list',
+                            'Manage and check-in registered visitors',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey,
@@ -298,51 +335,48 @@ class _VisitorPageSearchState extends State<VisitorPageSearch> {
               child: RefreshIndicator(
                 color: brandColor,
                 onRefresh: () async {
-                  final uri = Uri.parse(
-                      '$baseUrl/api/resource/Visitors Registration Log?fields=["full_name", "contact_number", "name", "log_type"]&limit=10000');
-                  final response = await http
-                      .get(uri, headers: {'Authorization': authToken});
-                  final body = response.body;
-                  final json = jsonDecode(body);
-                  final datas = json['data'] as List<dynamic>;
-                  print(datas);
-                  final transformed = datas.map((e) {
-                    return Visistor(
-                        full_name: e['full_name'],
-                        contact_number: e['contact_number'],
-                        name: e['name'],
-                        log_type: e['log_type']);
-                  }).toList();
-                  setState(() {
-                    _allVisitors = transformed;
-                    _foundVisitor = _allVisitors;
-                  });
-                  return Future<void>.delayed(const Duration(seconds: 2));
+                  await fetch_visitors();
                 },
-                child: _foundVisitor.isEmpty
-                    ? ListView(
-                        children: [
-                          const SizedBox(height: 60),
-                          Center(
-                            child: Column(
-                              children: [
-                                Icon(Icons.people_outline_rounded,
-                                    size: 56, color: Colors.grey.shade300),
-                                const SizedBox(height: 14),
-                                Text(
-                                  _allVisitors.isEmpty
-                                      ? 'Pull down to load visitors'
-                                      : 'No visitors match your search',
-                                  style: TextStyle(
-                                      color: Colors.grey.shade400,
-                                      fontSize: 14),
-                                ),
-                              ],
+                child: _isLoading && _foundVisitor.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const CircularProgressIndicator(
+                              color: brandColor,
+                              strokeWidth: 3,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 16),
+                            Text(
+                              'Loading visitors...',
+                              style: TextStyle(
+                                  color: Colors.grey.shade400, fontSize: 14),
+                            ),
+                          ],
+                        ),
                       )
-                    : ListView.builder(
+                    : _foundVisitor.isEmpty
+                        ? ListView(
+                            children: [
+                              const SizedBox(height: 60),
+                              Center(
+                                child: Column(
+                                  children: [
+                                    Icon(Icons.people_outline_rounded,
+                                        size: 56, color: Colors.grey.shade300),
+                                    const SizedBox(height: 14),
+                                    Text(
+                                      'No visitors match your search',
+                                      style: TextStyle(
+                                          color: Colors.grey.shade400,
+                                          fontSize: 14),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )
+                        : ListView.builder(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 4),
                         itemCount: _foundVisitor.length,
