@@ -383,83 +383,188 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
 
   @override
   Widget build(BuildContext context) {
+    const brandColor = Color.fromRGBO(13, 29, 56, 1);
+
     return SafeArea(
-        child: Scaffold(
-            backgroundColor: const Color(0xffEEF1F3),
-            body: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    Column(
-                      children: [
-                        const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Search Host",
+      child: Scaffold(
+        backgroundColor: const Color(0xffEEF1F3),
+        body: Column(
+          children: [
+            // ── Page header card (same as Search Visitor) ──────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(20),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: brandColor.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.people_alt_outlined,
+                            color: brandColor, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Select Host',
                             style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: brandColor,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          onChanged: (value) => _runFilter(value),
-                          decoration: InputDecoration(
-                            hintText: "Type to search...",
-                            prefixIcon: const Icon(Icons.search,
-                                color: Color.fromRGBO(13, 29, 56, 1)),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
+                          Text(
+                            'Choose who the visitor is meeting',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: const BorderSide(
-                                  color: Color.fromRGBO(13, 29, 56, 1),
-                                  width: 1.5),
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Search bar
+                  TextFormField(
+                    onChanged: (value) => _runFilter(value),
+                    decoration: InputDecoration(
+                      hintText: 'Type to search...',
+                      hintStyle: TextStyle(
+                          color: Colors.grey.shade400, fontSize: 14),
+                      prefixIcon:
+                          const Icon(Icons.search, color: brandColor),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            BorderSide(color: Colors.grey.shade200),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            BorderSide(color: Colors.grey.shade200),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                            color: brandColor, width: 1.5),
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xffF5F6FA),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                     ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: _foundEmployee.length,
-                        itemBuilder: (context, index) => Card(
-                          color: const Color(0xff233743),
-                          elevation: 4,
-                          margin: const EdgeInsets.symmetric(vertical: 6),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // ── Employee list ────────────────────────────────
+            Expanded(
+              child: _foundEmployee.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const CircularProgressIndicator(
+                            color: brandColor,
+                            strokeWidth: 3,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Loading employees...',
+                            style: TextStyle(
+                                color: Colors.grey.shade400, fontSize: 14),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 4),
+                      itemCount: _foundEmployee.length,
+                      itemBuilder: (context, index) {
+                        final emp = _foundEmployee[index];
+                        final initial = emp.employee_name.isNotEmpty
+                            ? emp.employee_name[0].toUpperCase()
+                            : '?';
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 4),
+                            leading: CircleAvatar(
+                              backgroundColor:
+                                  brandColor.withOpacity(0.1),
+                              child: Text(
+                                initial,
+                                style: const TextStyle(
+                                  color: brandColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                             title: Text(
-                              _foundEmployee[index].employee_name,
-                              style: const TextStyle(color: Colors.white),
+                              emp.employee_name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                                color: brandColor,
+                              ),
                             ),
                             subtitle: Text(
-                              _foundEmployee[index].employee,
-                              style: TextStyle(color: Colors.white.withOpacity(0.6)),
+                              emp.employee,
+                              style: TextStyle(
+                                  color: Colors.grey.shade500,
+                                  fontSize: 12),
                             ),
-                            trailing: const Icon(Icons.chevron_right,
-                                color: Colors.white54),
+                            trailing: const Icon(
+                              Icons.chevron_right_rounded,
+                              color: Colors.grey,
+                            ),
                             onTap: () {
-                              _showMyDialog(_foundEmployee[index].employee,
-                                  _foundEmployee[index].employee_name);
+                              _showMyDialog(
+                                emp.employee,
+                                emp.employee_name,
+                              );
                             },
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
-                  ],
-                ))));
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _handleSignupUser() {

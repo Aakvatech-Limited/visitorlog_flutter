@@ -198,57 +198,105 @@ class _VisitorPageSearchState extends State<VisitorPageSearch> {
     );
   }
 
-  @override
+@override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.all(20),
+    const brandColor = Color.fromRGBO(13, 29, 56, 1);
+
+    return Scaffold(
+      backgroundColor: const Color(0xffEEF1F3),
+      body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 16),
-            Column(
-              children: [
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Search Visitor",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromRGBO(170, 170, 185, 1),
+            // ── Page header card ──────────────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(20),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: brandColor.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.search_rounded,
+                            color: brandColor, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Search Visitor',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: brandColor,
+                            ),
+                          ),
+                          Text(
+                            'Pull down to refresh the list',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Search bar
+                  TextFormField(
+                    onChanged: (value) => _runFilter(value),
+                    decoration: InputDecoration(
+                      hintText: 'Type to search...',
+                      hintStyle:
+                          TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                      prefixIcon:
+                          const Icon(Icons.search, color: brandColor),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            BorderSide(color: Colors.grey.shade200),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            BorderSide(color: Colors.grey.shade200),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            const BorderSide(color: brandColor, width: 1.5),
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xffF5F6FA),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  onChanged: (value) => _runFilter(value),
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Type to search...",
-                    hintStyle: TextStyle(color: Colors.grey.shade400),
-                    prefixIcon: const Icon(Icons.search,
-                        color: Color.fromRGBO(170, 170, 185, 1)),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.white24),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.white24),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                          color: Color.fromRGBO(170, 170, 185, 1), width: 1.5),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.07),
-                  ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
+
+            const SizedBox(height: 12),
+
+            // ── List ─────────────────────────────────────────
             Expanded(
               child: RefreshIndicator(
+                color: brandColor,
                 onRefresh: () async {
                   final uri = Uri.parse(
                       '$baseUrl/api/resource/Visitors Registration Log?fields=["full_name", "contact_number", "name", "log_type"]&limit=10000');
@@ -271,42 +319,118 @@ class _VisitorPageSearchState extends State<VisitorPageSearch> {
                   });
                   return Future<void>.delayed(const Duration(seconds: 2));
                 },
-                child: ListView.builder(
-                  itemCount: _foundVisitor.length,
-                  itemBuilder: (context, index) => Card(
-                    color: Color.fromRGBO(170, 170, 185, 1),
-                    elevation: 4,
-                    margin: const EdgeInsets.symmetric(vertical: 6),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ListTile(
-                      title: Text(
-                        _foundVisitor[index].full_name,
-                        style: const TextStyle(
-                            color: Color.fromRGBO(13, 29, 56, 1),
-                            fontWeight: FontWeight.w600),
+                child: _foundVisitor.isEmpty
+                    ? ListView(
+                        children: [
+                          const SizedBox(height: 60),
+                          Center(
+                            child: Column(
+                              children: [
+                                Icon(Icons.people_outline_rounded,
+                                    size: 56, color: Colors.grey.shade300),
+                                const SizedBox(height: 14),
+                                Text(
+                                  _allVisitors.isEmpty
+                                      ? 'Pull down to load visitors'
+                                      : 'No visitors match your search',
+                                  style: TextStyle(
+                                      color: Colors.grey.shade400,
+                                      fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 4),
+                        itemCount: _foundVisitor.length,
+                        itemBuilder: (context, index) {
+                          final visitor = _foundVisitor[index];
+                          final isIn = visitor.log_type == 'IN';
+                          final initial = visitor.full_name.isNotEmpty
+                              ? visitor.full_name[0].toUpperCase()
+                              : '?';
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 4),
+                              leading: CircleAvatar(
+                                backgroundColor: isIn
+                                    ? Colors.green.withOpacity(0.12)
+                                    : Colors.grey.withOpacity(0.12),
+                                child: Text(
+                                  initial,
+                                  style: TextStyle(
+                                    color: isIn
+                                        ? Colors.green.shade700
+                                        : Colors.grey.shade600,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              title: Text(
+                                visitor.full_name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                  color: brandColor,
+                                ),
+                              ),
+                              subtitle: Text(
+                                visitor.contact_number,
+                                style: TextStyle(
+                                    color: Colors.grey.shade500, fontSize: 12),
+                              ),
+                              trailing: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: isIn
+                                      ? Colors.green.withOpacity(0.1)
+                                      : Colors.grey.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  visitor.log_type,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: isIn
+                                        ? Colors.green.shade700
+                                        : Colors.grey.shade600,
+                                  ),
+                                ),
+                              ),
+                              onTap: () {
+                                scanQR(
+                                  visitor.name,
+                                  visitor.log_type,
+                                  visitor.full_name,
+                                );
+                              },
+                            ),
+                          );
+                        },
                       ),
-                      subtitle: Text(
-                        _foundVisitor[index].contact_number,
-                        style: const TextStyle(
-                            color: Color.fromRGBO(13, 29, 56, 1)),
-                      ),
-                      trailing: const Icon(Icons.chevron_right,
-                          color: Color.fromRGBO(13, 29, 56, 1)),
-                      onTap: () {
-                        scanQR(
-                          _foundVisitor[index].name,
-                          _foundVisitor[index].log_type,
-                          _foundVisitor[index].full_name,
-                        );
-                      },
-                    ),
-                  ),
-                ),
               ),
             ),
           ],
-        ));
+        ),
+      ),
+    );
   }
 }
