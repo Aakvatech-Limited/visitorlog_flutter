@@ -29,11 +29,17 @@ class _HomeState extends State<Home> {
   String selectedLanguage = 'English';
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
-    VisitorHome(),
-    VisitorScan(),
-    VisitorPageSearch(),
-    VisitorPage(),
+  List<Widget> get _pages => [
+    VisitorHome(
+      onNavigate: (index) {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
+    ),
+    const VisitorScan(),
+    const VisitorPageSearch(),
+    const VisitorPage(),
   ];
 
   @override
