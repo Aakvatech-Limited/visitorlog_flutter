@@ -32,46 +32,18 @@ class _VisitorPageState extends State<VisitorPage> {
 
   final _signupFormKey = GlobalKey<FormState>();
 
-  // Future _pickProfileImage() async {
-  //   try {
-  //     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-  //     if (image == null) return;
-
-  //     final imageTemporary = File(image.path);
-  //     setState(() => _profileImage = imageTemporary);
-  //   } on PlatformException catch (e) {
-  //     debugPrint('Failed to pick image error: $e');
-  //   }
-  // }
-
-  // Future _pickProfileImage() async {
-  //   try {
-  //     final image = await ImagePicker().pickImage(source: ImageSource.camera);
-  //     if (image == null) return;
-
-  //     final imageTemporary = File(image.path);
-  //     setState(() => _profileImage = imageTemporary);
-  //   } on PlatformException catch (e) {
-  //     debugPrint('Failed to pick image error: $e');
-  //   }
-  // }
   Future _pickProfileImage() async {
-    // Request camera permission
     final cameraPermission = await Permission.camera.request();
-
-    // Check if permission is granted
     if (cameraPermission.isGranted) {
       try {
         final image = await ImagePicker().pickImage(source: ImageSource.camera);
         if (image == null) return;
-
         final imageTemporary = File(image.path);
         setState(() => _profileImage = imageTemporary);
       } on PlatformException catch (e) {
         debugPrint('Failed to pick image error: $e');
       }
     } else {
-      // Permission denied
       debugPrint('Camera permission denied');
     }
   }
@@ -118,7 +90,7 @@ class _VisitorPageState extends State<VisitorPage> {
                                     height: 50,
                                     width: 50,
                                     decoration: BoxDecoration(
-                                      color: Colors.blue.shade400,
+                                      color: Color.fromRGBO(13, 29, 56, 1),
                                       border: Border.all(
                                           color: Colors.white, width: 3),
                                       borderRadius: BorderRadius.circular(25),
@@ -135,9 +107,7 @@ class _VisitorPageState extends State<VisitorPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(
-                        height: 16,
-                      ),
+                      const SizedBox(height: 16),
                       CustomInputField(
                           onSaved: (text) {
                             _fullName = text;
@@ -151,9 +121,7 @@ class _VisitorPageState extends State<VisitorPage> {
                             }
                             return null;
                           }),
-                      const SizedBox(
-                        height: 16,
-                      ),
+                      const SizedBox(height: 16),
                       CustomInputField(
                           onSaved: (text) {
                             _contactNumber = text;
@@ -167,9 +135,7 @@ class _VisitorPageState extends State<VisitorPage> {
                             }
                             return null;
                           }),
-                      const SizedBox(
-                        height: 16,
-                      ),
+                      const SizedBox(height: 16),
                       CustomInputField(
                           onSaved: (text) {
                             _address = text;
@@ -179,13 +145,11 @@ class _VisitorPageState extends State<VisitorPage> {
                           isDense: true,
                           validator: (textValue) {
                             if (textValue == null || textValue.isEmpty) {
-                              return 'address is required!';
+                              return 'Address is required!';
                             }
                             return null;
                           }),
-                      const SizedBox(
-                        height: 16,
-                      ),
+                      const SizedBox(height: 16),
                       CustomInputField(
                           onSaved: (text) {
                             _purpose = text;
@@ -195,20 +159,16 @@ class _VisitorPageState extends State<VisitorPage> {
                           isDense: true,
                           validator: (textValue) {
                             if (textValue == null || textValue.isEmpty) {
-                              return 'purpose is required!';
+                              return 'Purpose is required!';
                             }
                             return null;
                           }),
-                      const SizedBox(
-                        height: 22,
-                      ),
+                      const SizedBox(height: 22),
                       CustomFormButton(
                         innerText: 'Next',
                         onPressed: _handleSignupUser,
                       ),
-                      const SizedBox(
-                        height: 30,
-                      ),
+                      const SizedBox(height: 30),
                     ],
                   ),
                 ),
@@ -221,10 +181,8 @@ class _VisitorPageState extends State<VisitorPage> {
   }
 
   void _handleSignupUser() {
-    // signup user
     if (_signupFormKey.currentState!.validate()) {
       _signupFormKey.currentState!.save();
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please wait..'),

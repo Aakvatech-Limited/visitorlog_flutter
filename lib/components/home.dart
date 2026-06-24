@@ -25,48 +25,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  //
   final _loginFormKey = GlobalKey<FormState>();
   String selectedLanguage = 'English';
   int _selectedIndex = 0;
-  Future<void> _showMyDialog(String message) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(message),
-          // content: Column(
-          //   mainAxisSize: MainAxisSize.min,
-          //   children: [
-          //     ListTile(
-          //       title: Text('IN'),
-          //       leading: Radio<String>(
-          //         value: 'IN',
-          //         groupValue: selectedLanguage,
-          //         onChanged: (value) {
-          //           Navigator.push(context,
-          //               MaterialPageRoute(builder: (context) => VisitorScan()));
-          //         },
-          //       ),
-          //     ),
-          //     ListTile(
-          //       title: Text('OUT'),
-          //       leading: Radio<String>(
-          //         value: 'OUT',
-          //         groupValue: selectedLanguage,
-          //         onChanged: (value) {
-          //           Navigator.push(context,
-          //               MaterialPageRoute(builder: (context) => VisitorScan()));
-          //         },
-          //       ),
-          //     ),
-          //   ],
-          // ),
-        );
-      },
-    );
-  }
 
   final List<Widget> _pages = [
     VisitorHome(),
@@ -94,21 +55,19 @@ class _HomeState extends State<Home> {
           ),
           child: SafeArea(
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
               child: GNav(
                 rippleColor: Colors.grey[300]!,
                 hoverColor: Colors.grey[100]!,
                 gap: 8,
-                activeColor: Colors.black,
+                activeColor: Colors.white,
                 iconSize: 24,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 duration: const Duration(milliseconds: 400),
-                tabBackgroundColor: Color.fromRGBO(170, 170, 185, 1),
+                tabBackgroundColor: Color.fromRGBO(13, 29, 56, 1),
                 tabs: const [
                   GButton(
-                    icon: Icons.home,
+                    icon: Icons.home_outlined,
                     text: 'Home',
                   ),
                   GButton(
@@ -120,11 +79,11 @@ class _HomeState extends State<Home> {
                     text: 'Search',
                   ),
                   GButton(
-                    icon: Icons.person,
+                    icon: Icons.person_outline,
                     text: 'Register',
                   ),
                 ],
-                color: Color.fromRGBO(170, 170, 185, 1),
+                color: Color.fromRGBO(13, 29, 56, 1),
                 selectedIndex: _selectedIndex,
                 onTabChange: (index) {
                   setState(() {
@@ -140,7 +99,6 @@ class _HomeState extends State<Home> {
   }
 
   void _handleLoginUser() {
-    // login user
     if (_loginFormKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Submitting data..')),

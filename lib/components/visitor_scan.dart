@@ -1,21 +1,10 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:ui_shop/components/common/custom_input_field.dart';
-import 'package:ui_shop/components/common/page_header.dart';
-import 'package:ui_shop/components/forget_password_page.dart';
-import 'package:ui_shop/components/signup_page.dart';
-import 'package:email_validator/email_validator.dart';
-import 'package:ui_shop/components/common/page_heading.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:ui_shop/components/common/custom_form_button.dart';
-
 import 'home.dart';
-import 'visitor_home.dart';
 
 class VisitorScan extends StatefulWidget {
   const VisitorScan({
@@ -40,7 +29,6 @@ class _VisitorScanState extends State<VisitorScan> {
   Future<void> scanQR() async {
     String barcodeScanRes = '';
     try {
-      // Navigate to scanner page and wait for result
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -49,6 +37,8 @@ class _VisitorScanState extends State<VisitorScan> {
             return Scaffold(
               appBar: AppBar(
                 title: const Text('Scan QR Code'),
+                backgroundColor: Color.fromRGBO(13, 29, 56, 1),
+                foregroundColor: Colors.white,
               ),
               body: MobileScanner(
                 onDetect: (capture) {
@@ -82,47 +72,118 @@ class _VisitorScanState extends State<VisitorScan> {
     print("Parsed log: $log");
 
     if (log == null) {
-      _showMyDialog("Server error or invalid response. Body: $body");
+      _showResultDialog(
+        icon: Icons.error_outline,
+        iconColor: Colors.red,
+        title: 'Server Error',
+        message: 'Invalid response. Please try again.',
+      );
       return;
     }
 
     if (log['status'] == "card_not_existing") {
-      _showMyDialog("This Card not existing.");
+      _showResultDialog(
+        icon: Icons.credit_card_off_outlined,
+        iconColor: Colors.orange,
+        title: 'Card Not Found',
+        message: 'This card does not exist in the system.',
+      );
       return;
     }
 
     if (log['status'] == "card_not_in_use") {
-      _showMyDialog("This Card not in use.");
+      _showResultDialog(
+        icon: Icons.info_outline,
+        iconColor: Colors.blueGrey,
+        title: 'Card Not Active',
+        message: 'This card is currently not in use.',
+      );
       return;
     }
 
     if (log['status'] == "card_signed_out") {
-      _showMyDialog(
-          "This Card has Successfully been signed out. Ready to be used by another visitor.");
+      _showResultDialog(
+        icon: Icons.check_circle_outline,
+        iconColor: Colors.green,
+        title: 'Signed Out',
+        message: 'Visitor signed out successfully. Card is ready for the next visitor.',
+      );
       return;
     }
 
     if (log['status'] == "set_api_type") {
-      _showMyDialog("set_api_type.");
+      _showResultDialog(
+        icon: Icons.settings_outlined,
+        iconColor: Colors.grey,
+        title: 'Configuration',
+        message: 'API type needs to be set.',
+      );
       return;
     }
   }
 
-  Future<void> _showMyDialog(String message) async {
+  Future<void> _showResultDialog({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String message,
+  }) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: true, // user must tap button!
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(message),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const Home()));
-              },
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: iconColor, size: 48),
+              const SizedBox(height: 14),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromRGBO(13, 29, 56, 1),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+          actions: [
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Color.fromRGBO(13, 29, 56, 1),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const Home()));
+                },
+                child: const Text('Close'),
+              ),
             ),
           ],
         );
@@ -133,7 +194,7 @@ class _VisitorScanState extends State<VisitorScan> {
   Future _showLoading() async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return const Center(child: CircularProgressIndicator());
       },
@@ -151,7 +212,12 @@ class _VisitorScanState extends State<VisitorScan> {
         headers: {'Authorization': authToken});
     final body = response.body;
     Navigator.of(context).pop();
-    _showMyDialog(body);
+    _showResultDialog(
+      icon: Icons.check_circle_outline,
+      iconColor: Colors.green,
+      title: 'Response',
+      message: body,
+    );
   }
 
   @override

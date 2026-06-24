@@ -64,17 +64,23 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
     const authToken = 'token 12b59d64ab0f102:0e59fedfef8c2e8';
 
     try {
-      // Navigate to scanner page and wait for result
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => MobileScanner(
-            onDetect: (capture) {
-              final List<Barcode> barcodes = capture.barcodes;
-              if (barcodes.isNotEmpty) {
-                Navigator.pop(context, barcodes.first.rawValue ?? '');
-              }
-            },
+          builder: (context) => Scaffold(
+            appBar: AppBar(
+              title: const Text('Scan Card QR Code'),
+              backgroundColor: Color.fromRGBO(13, 29, 56, 1),
+              foregroundColor: Colors.white,
+            ),
+            body: MobileScanner(
+              onDetect: (capture) {
+                final List<Barcode> barcodes = capture.barcodes;
+                if (barcodes.isNotEmpty) {
+                  Navigator.pop(context, barcodes.first.rawValue ?? '');
+                }
+              },
+            ),
           ),
         ),
       );
@@ -96,23 +102,42 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
     print(log);
 
     if (log['status'] == "card_not_existing") {
-      _showMyDialogMessage("This Card not existing.");
+      _showResultDialog(
+        icon: Icons.credit_card_off_outlined,
+        iconColor: Colors.orange,
+        title: 'Card Not Found',
+        message: 'This card does not exist in the system.',
+      );
       return;
     }
 
     if (log['status'] == "card_in_use") {
-      _showMyDialogMessage("This Card is in use.");
+      _showResultDialog(
+        icon: Icons.warning_amber_outlined,
+        iconColor: Colors.amber.shade700,
+        title: 'Card In Use',
+        message: 'This card is currently assigned to another visitor.',
+      );
       return;
     }
 
     if (log['status'] == "card_signed_out") {
-      _showMyDialogMessage(
-          "This Card has Successfully been signed out. Ready to be used by another visitor.");
+      _showResultDialog(
+        icon: Icons.check_circle_outline,
+        iconColor: Colors.green,
+        title: 'Signed Out',
+        message: 'Card signed out successfully. Ready for the next visitor.',
+      );
       return;
     }
 
     if (log['status'] == "set_api_type") {
-      _showMyDialogMessage("set_api_type.");
+      _showResultDialog(
+        icon: Icons.settings_outlined,
+        iconColor: Colors.grey,
+        title: 'Configuration',
+        message: 'API type needs to be set.',
+      );
       return;
     }
 
@@ -163,7 +188,12 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
       }
       Navigator.of(context).pop();
       Navigator.of(context).pop();
-      _showMyDialogMessage("Card registered, Visitor can procced.");
+      _showResultDialog(
+        icon: Icons.check_circle_outline,
+        iconColor: Colors.green,
+        title: 'Visitor Registered',
+        message: 'Card registered successfully. The visitor may now proceed.',
+      );
       return;
     }
   }
@@ -184,20 +214,105 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
     return transformed;
   }
 
+  // Confirm dialog before sending — now shows both name and ID clearly
   Future<void> _showMyDialog(String employee_id, String employee_name) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Are you sure want to send to?"),
-          content: Text(employee_id),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Send'),
-              onPressed: () {
-                _sendVisotors(employee_id);
-              },
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.person_outline,
+                size: 44,
+                color: Color.fromRGBO(13, 29, 56, 1),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Confirm Host',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromRGBO(13, 29, 56, 1),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Send visitor to:',
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xffEEF1F3),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      employee_name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        color: Color.fromRGBO(13, 29, 56, 1),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      employee_id,
+                      style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.grey.shade600,
+                      side: BorderSide(color: Colors.grey.shade300),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Color.fromRGBO(13, 29, 56, 1),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    onPressed: () {
+                      _sendVisotors(employee_id);
+                    },
+                    child: const Text('Send'),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -205,21 +320,69 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
     );
   }
 
-  Future<void> _showMyDialogMessage(String message) async {
+  // Result dialog with icon + title + message
+  Future<void> _showResultDialog({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String message,
+  }) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: true, // user must tap button!
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(message),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const Home()));
-              },
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: iconColor, size: 48),
+              const SizedBox(height: 14),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromRGBO(13, 29, 56, 1),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+          actions: [
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Color.fromRGBO(13, 29, 56, 1),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const Home()));
+                },
+                child: const Text('Close'),
+              ),
             ),
           ],
         );
@@ -238,9 +401,7 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    const SizedBox(
-                      height: 16,
-                    ),
+                    const SizedBox(height: 16),
                     Column(
                       children: [
                         const Align(
@@ -251,24 +412,44 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                         ),
+                        const SizedBox(height: 8),
                         TextFormField(
                           onChanged: (value) => _runFilter(value),
-                          decoration: const InputDecoration(
-                            hintText: "Enter",
+                          decoration: InputDecoration(
+                            hintText: "Type to search...",
+                            prefixIcon: const Icon(Icons.search,
+                                color: Color.fromRGBO(13, 29, 56, 1)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                  color: Color.fromRGBO(13, 29, 56, 1),
+                                  width: 1.5),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(
-                      height: 16,
-                    ),
+                    const SizedBox(height: 16),
                     Expanded(
                       child: ListView.builder(
                         itemCount: _foundEmployee.length,
                         itemBuilder: (context, index) => Card(
                           color: const Color(0xff233743),
                           elevation: 4,
-                          margin: const EdgeInsets.symmetric(vertical: 10),
+                          margin: const EdgeInsets.symmetric(vertical: 6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           child: ListTile(
                             title: Text(
                               _foundEmployee[index].employee_name,
@@ -276,8 +457,10 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
                             ),
                             subtitle: Text(
                               _foundEmployee[index].employee,
-                              style: const TextStyle(color: Colors.white),
+                              style: TextStyle(color: Colors.white.withOpacity(0.6)),
                             ),
+                            trailing: const Icon(Icons.chevron_right,
+                                color: Colors.white54),
                             onTap: () {
                               _showMyDialog(_foundEmployee[index].employee,
                                   _foundEmployee[index].employee_name);
@@ -291,7 +474,6 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
   }
 
   void _handleSignupUser() {
-    // signup user
     if (_signupFormKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Submitting data..')),
