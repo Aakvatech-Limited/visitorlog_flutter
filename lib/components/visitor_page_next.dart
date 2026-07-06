@@ -142,38 +142,53 @@ class _VisitorPageNextState extends State<VisitorPageNext> {
             );
           });
 
-      final request = http.MultipartRequest(
-          'POST', Uri.parse('$baseUrl/api/method/upload_file'));
-      request.files
-          .add(await http.MultipartFile.fromPath('file', profileImage!.path));
-      request.headers['Accept'] = 'application/json';
-      request.headers['Authorization'] = authToken;
-      try {
-        final response = await request.send();
-        final responseBody = await response.stream.bytesToString();
+      String? uploadedImageUrl;
 
-        if (response.statusCode == 200) {
-          final responseData = jsonDecode(responseBody);
-          final uri =
-              Uri.parse('$baseUrl/api/resource/Visitors Registration Log');
-          final response = await http.post(uri, body: {
-            'full_name': widget.fullName,
-            'contact_number': widget.contactNumber,
-            'address': widget.address,
-            'purpose': widget.purpose,
-            'employee': employee,
-            'visitor_image': responseData['message']['file_url'],
-            'log_type': 'IN',
-            'qr_code': barcodeScanRes
-          }, headers: {
-            'Authorization': authToken
-          });
-          print('File uploaded successfully.');
-        } else {
-          print('Failed to upload file. Status code: ${response.statusCode}');
+      if (profileImage != null) {
+        final request = http.MultipartRequest(
+            'POST', Uri.parse('$baseUrl/api/method/upload_file'));
+        request.files
+            .add(await http.MultipartFile.fromPath('file', profileImage.path));
+        request.headers['Accept'] = 'application/json';
+        request.headers['Authorization'] = authToken;
+        try {
+          final response = await request.send();
+          final responseBody = await response.stream.bytesToString();
+
+          if (response.statusCode == 200) {
+            final responseData = jsonDecode(responseBody);
+            uploadedImageUrl = responseData['message']['file_url'];
+            print('File uploaded successfully.');
+          } else {
+            print('Failed to upload file. Status code: ${response.statusCode}');
+          }
+        } catch (e) {
+          print('Error uploading file: $e');
         }
+      }
+
+      // Now create the registration log (with or without image)
+      final uri = Uri.parse('$baseUrl/api/resource/Visitors Registration Log');
+      final bodyData = {
+        'full_name': widget.fullName ?? '',
+        'contact_number': widget.contactNumber ?? '',
+        'address': widget.address ?? '',
+        'purpose': widget.purpose ?? '',
+        'employee': employee,
+        'log_type': 'IN',
+        'qr_code': barcodeScanRes
+      };
+      
+      if (uploadedImageUrl != null) {
+        bodyData['visitor_image'] = uploadedImageUrl;
+      }
+
+      try {
+        await http.post(uri, body: bodyData, headers: {
+          'Authorization': authToken
+        });
       } catch (e) {
-        print('Error uploading file: $e');
+        print('Error saving log: $e');
       }
       Navigator.of(context).pop();
       Navigator.of(context).pop();
